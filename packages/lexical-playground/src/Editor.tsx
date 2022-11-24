@@ -7,34 +7,33 @@
  */
 
 import {AutoFocusPlugin} from '@lexical/react/LexicalAutoFocusPlugin';
-import {CharacterLimitPlugin} from '@lexical/react/LexicalCharacterLimitPlugin';
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import {HistoryPlugin} from '@lexical/react/LexicalHistoryPlugin';
+import {PlainTextPlugin} from '@lexical/react/LexicalPlainTextPlugin';
 import {RichTextPlugin} from '@lexical/react/LexicalRichTextPlugin';
 import * as React from 'react';
 
 import {useSharedHistoryContext} from './context/SharedHistoryContext';
-import AutocompletePlugin from './plugins/AutocompletePlugin';
 import CodeHighlightPlugin from './plugins/CodeHighlightPlugin';
-import KeywordsPlugin from './plugins/KeywordsPlugin';
 import {MaxLengthPlugin} from './plugins/MaxLengthPlugin';
 import ToolbarPlugin from './plugins/ToolbarPlugin';
 import TreeViewPlugin from './plugins/TreeViewPlugin';
 import ContentEditable from './ui/ContentEditable';
+import MarkdownPlugin from './plugins/MarkdownShortcutPlugin';
 import Placeholder from './ui/Placeholder';
 
-export default function Editor(): JSX.Element {
+import MentionsPlugin from './replay/plugins/mentions/MentionsPlugin';
+
+export function CommentEditor(): JSX.Element {
   const {historyState} = useSharedHistoryContext();
 
-  const placeholder = <Placeholder>aaaa</Placeholder>;
+  const placeholder = <Placeholder>Write a comment</Placeholder>;
 
   return (
     <>
-      <ToolbarPlugin />
       <div className={`editor-container tree-view`}>
         <MaxLengthPlugin maxLength={500} />
         <AutoFocusPlugin />
-        <KeywordsPlugin />
         <HistoryPlugin externalHistoryState={historyState} />
         <RichTextPlugin
           contentEditable={
@@ -47,9 +46,38 @@ export default function Editor(): JSX.Element {
           placeholder={placeholder}
           ErrorBoundary={LexicalErrorBoundary}
         />
+        <MentionsPlugin />
+      </div>
+      <MarkdownPlugin />
+      <TreeViewPlugin />
+    </>
+  );
+}
+
+export function TerminalEditor(): JSX.Element {
+  const {historyState} = useSharedHistoryContext();
+
+  const placeholder = <Placeholder>Type an expression</Placeholder>;
+
+  return (
+    <>
+      <ToolbarPlugin />
+      <div className={`editor-container tree-view`}>
+        <MaxLengthPlugin maxLength={500} />
+        <AutoFocusPlugin />
+        <HistoryPlugin externalHistoryState={historyState} />
+        <PlainTextPlugin
+          contentEditable={
+            <div className="editor-scroller">
+              <div className="editor code">
+                <ContentEditable />
+              </div>
+            </div>
+          }
+          ErrorBoundary={LexicalErrorBoundary}
+          placeholder={placeholder}
+        />
         <CodeHighlightPlugin />
-        <CharacterLimitPlugin charset="UTF-16" />
-        <AutocompletePlugin />
       </div>
       <TreeViewPlugin />
     </>

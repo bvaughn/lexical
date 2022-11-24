@@ -1,0 +1,33 @@
+import * as React from 'react';
+import {useLayoutEffect, useRef} from 'react';
+
+import {ItemRendererProps} from '../typeahead/types';
+
+import './styles.css';
+import {TeamMember} from './types';
+
+export default function MentionsItemRenderer({
+  isSelected,
+  item,
+  onClick,
+}: ItemRendererProps<TeamMember>) {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (isSelected) {
+      const element = ref.current;
+      if (element) {
+        element.scrollIntoView({block: 'nearest'});
+      }
+    }
+  }, [isSelected]);
+
+  return (
+    <div
+      className={isSelected ? 'mentions-item-selected' : 'mentions-item'}
+      onClick={onClick}
+      ref={ref}>
+      {item.name} <small>({item.username})</small>
+    </div>
+  );
+}

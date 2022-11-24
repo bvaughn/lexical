@@ -74,7 +74,7 @@ header h1 {
 }
 
 .editor-scroller {
-  min-height: 150px;
+  height: 100px;
   border: 0;
   resize: none;
   cursor: text;
@@ -113,7 +113,7 @@ pre {
   padding: 0;
   font-size: 12px;
   margin: 1px auto 10px auto;
-  max-height: 250px;
+  max-height: 150px;
   position: relative;
   overflow: hidden;
   border-bottom-left-radius: 10px;
@@ -1594,4 +1594,8 @@ hr.selected {
   white-space: pre-wrap;
   word-break: break-word;
   z-index: 3;
+}
+
+.code {
+  font-family: monospace;
 }

@@ -10,14 +10,11 @@ import {LexicalComposer} from '@lexical/react/LexicalComposer';
 import {$createParagraphNode, $createTextNode, $getRoot} from 'lexical';
 import * as React from 'react';
 
-import {SettingsContext, useSettings} from './context/SettingsContext';
-import {SharedAutocompleteContext} from './context/SharedAutocompleteContext';
+import {SettingsContext} from './context/SettingsContext';
+import {TypeAheadContextProvider} from './replay/plugins/typeahead/TypeAheadContext';
 import {SharedHistoryContext} from './context/SharedHistoryContext';
-import Editor from './Editor';
-import logo from './images/logo.svg';
+import {CommentEditor, TerminalEditor} from './Editor';
 import PlaygroundNodes from './nodes/PlaygroundNodes';
-import {TableContext} from './plugins/TablePlugin';
-import Settings from './Settings';
 import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
 
 function prepopulatedRichText() {
@@ -29,7 +26,7 @@ function prepopulatedRichText() {
   }
 }
 
-function App(): JSX.Element {
+export default function App(): JSX.Element {
   const initialConfig = {
     editorState: prepopulatedRichText,
     namespace: 'Playground',
@@ -41,30 +38,31 @@ function App(): JSX.Element {
   };
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <SharedHistoryContext>
-        <TableContext>
-          <SharedAutocompleteContext>
+    <SettingsContext>
+      <LexicalComposer initialConfig={initialConfig}>
+        <SharedHistoryContext>
+          <TypeAheadContextProvider>
             <header>
-              <a href="https://lexical.dev" target="_blank" rel="noopener">
-                <img src={logo} alt="Lexical Logo" />
-              </a>
+              <h1>Terminal input</h1>
             </header>
             <div className="editor-shell">
-              <Editor />
+              <TerminalEditor />
             </div>
-            <Settings />
-          </SharedAutocompleteContext>
-        </TableContext>
-      </SharedHistoryContext>
-    </LexicalComposer>
-  );
-}
-
-export default function PlaygroundApp(): JSX.Element {
-  return (
-    <SettingsContext>
-      <App />
+          </TypeAheadContextProvider>
+        </SharedHistoryContext>
+      </LexicalComposer>
+      <LexicalComposer initialConfig={initialConfig}>
+        <SharedHistoryContext>
+          <TypeAheadContextProvider>
+            <header>
+              <h1>Comment editor</h1>
+            </header>
+            <div className="editor-shell">
+              <CommentEditor />
+            </div>
+          </TypeAheadContextProvider>
+        </SharedHistoryContext>
+      </LexicalComposer>
     </SettingsContext>
   );
 }

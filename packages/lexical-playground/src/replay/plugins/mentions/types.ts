@@ -1,14 +1,13 @@
 import type {Spread} from 'lexical';
+import {type SerializedLexicalNode} from 'lexical';
 
-import {type SerializedTextNode} from 'lexical';
-
-export type SerializedMentionsTextNode = Spread<
+export type SerializedMentionsNode = Spread<
   {
-    text: string;
+    teamMember: TeamMember;
     type: 'mentions-item';
     version: 1;
   },
-  SerializedTextNode
+  SerializedLexicalNode
 >;
 
 export type TeamMember = {

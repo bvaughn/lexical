@@ -46,7 +46,7 @@
   user-select: none;
 }
 
-.mentions-item small {
+.mentions-item-small {
   font-size: 0.75em;
   font-weight: bold;
 }
@@ -55,7 +55,21 @@
   background-color: dodgerblue;
 }
 
-.mentions-node {
+.mentions-node,
+.mentions-node-selected {
   color: dodgerblue;
   font-weight: bold;
+  user-select: none;
+  cursor: default;
+  border-width: 1px;
+  border-style: dashed;
+  border-color: transparent;
+}
+.mentions-node-selected {
+  border-color: lightsteelblue;
+  border-radius: 0.25em;
+}
+
+.mentions-node-small {
+  color: gray;
 }

@@ -8,6 +8,7 @@ import {
   KEY_ARROW_UP_COMMAND,
   KEY_ENTER_COMMAND,
   KEY_TAB_COMMAND,
+  LexicalNode,
   TextNode,
 } from 'lexical';
 import {FunctionComponent, useEffect} from 'react';
@@ -29,13 +30,13 @@ export const uuid = Math.random()
 
 export default function AutocompletePlugin<Item extends Object>({
   anchorElem = document.body,
-  createTextNode = $createTextNode as any,
+  createItemNode = $createTextNode as any,
   getQueryData,
   findMatches,
   ItemListRenderer,
 }: {
   anchorElem?: HTMLElement;
-  createTextNode?: (item: Item) => TextNode;
+  createItemNode?: (item: Item) => LexicalNode;
   getQueryData: (selection: TypeAheadSelection | null) => QueryData | null;
   findMatches: (query: string) => SearchPromise<Item>;
   ItemListRenderer: FunctionComponent<ItemListRendererProps<Item>>;
@@ -126,7 +127,7 @@ export default function AutocompletePlugin<Item extends Object>({
               return;
             }
 
-            const itemTextNode = createTextNode(selectedItem as Item);
+            const itemNode = createItemNode(selectedItem as Item);
 
             const {beginTextNode, beginOffset, endTextNode, endOffset} =
               queryData;
@@ -138,19 +139,19 @@ export default function AutocompletePlugin<Item extends Object>({
                   if (beginOffset === endOffset) {
                     const [firstTextNode] =
                       currentTextNode.splitText(beginOffset);
-                    firstTextNode.insertAfter(itemTextNode);
-                    itemTextNode.select();
+                    firstTextNode.insertAfter(itemNode);
+                    itemNode.select();
                   } else {
                     const [firstTextNode, secondTextNode] =
                       currentTextNode.splitText(beginOffset, endOffset);
 
                     if (beginOffset === 0 || secondTextNode == null) {
-                      firstTextNode.replace(itemTextNode);
+                      firstTextNode.replace(itemNode);
                     } else {
-                      secondTextNode.replace(itemTextNode);
+                      secondTextNode.replace(itemNode);
                     }
 
-                    itemTextNode.select();
+                    itemNode.select();
                   }
 
                   break nodes;
@@ -162,12 +163,12 @@ export default function AutocompletePlugin<Item extends Object>({
                     currentTextNode.splitText(beginOffset);
 
                   if (beginOffset === 0 || secondTextNode == null) {
-                    firstTextNode.replace(itemTextNode);
+                    firstTextNode.replace(itemNode);
                   } else {
-                    secondTextNode.replace(itemTextNode);
+                    secondTextNode.replace(itemNode);
                   }
 
-                  itemTextNode.select();
+                  itemNode.select();
 
                   currentTextNode = nextTextNode;
                 }

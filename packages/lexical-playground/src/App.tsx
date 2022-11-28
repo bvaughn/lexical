@@ -1,70 +1,75 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
-import {LexicalComposer} from '@lexical/react/LexicalComposer';
-import {$createParagraphNode, $createTextNode, $getRoot} from 'lexical';
 import * as React from 'react';
+import {useState} from 'react';
 
-import {SettingsContext, useSettings} from './context/SettingsContext';
-import {SharedAutocompleteContext} from './context/SharedAutocompleteContext';
-import {SharedHistoryContext} from './context/SharedHistoryContext';
-import Editor from './Editor';
-import logo from './images/logo.svg';
-import PlaygroundNodes from './nodes/PlaygroundNodes';
-import {TableContext} from './plugins/TablePlugin';
-import Settings from './Settings';
-import PlaygroundEditorTheme from './themes/PlaygroundEditorTheme';
+import CodeEditor from './CodeEditor';
+import CommentEditor from './CommentEditor';
 
-function prepopulatedRichText() {
-  const root = $getRoot();
-  if (root.getFirstChild() === null) {
-    const paragraph = $createParagraphNode();
-    paragraph.append($createTextNode('This is a test'));
-    root.append(paragraph);
-  }
-}
+export default function App(): JSX.Element {
+  const [code, setCode] = useState('`URL: "${window.location.href}"`');
+  const [comment, setComment] = useState(
+    'This is a **rich text** comment with `code`\n\nand a _mention_: @bvaughn!',
+  );
 
-function App(): JSX.Element {
-  const initialConfig = {
-    editorState: prepopulatedRichText,
-    namespace: 'Playground',
-    nodes: [...PlaygroundNodes],
-    onError: (error: Error) => {
-      throw error;
-    },
-    theme: PlaygroundEditorTheme,
+  const onCommentChange = (newComment: string) => {
+    // console.group('onCommentChange');
+    // console.log(newComment);
+    // console.groupEnd();
+    setComment(newComment);
+  };
+
+  const onCommentSubmit = () => {
+    // console.group('onCommentSubmit');
+    // console.log(comment);
+    // console.groupEnd();
+  };
+
+  const onTerminalChange = (newCode: string) => {
+    // console.group('onTerminalChange');
+    // console.log(newCode);
+    // console.groupEnd();
+    setCode(newCode);
+  };
+
+  const onTerminalSubmit = () => {
+    // console.group('onTerminalSubmit');
+    // console.log(code);
+    // console.groupEnd();
   };
 
   return (
-    <LexicalComposer initialConfig={initialConfig}>
-      <SharedHistoryContext>
-        <TableContext>
-          <SharedAutocompleteContext>
-            <header>
-              <a href="https://lexical.dev" target="_blank" rel="noopener">
-                <img src={logo} alt="Lexical Logo" />
-              </a>
-            </header>
-            <div className="editor-shell">
-              <Editor />
-            </div>
-            <Settings />
-          </SharedAutocompleteContext>
-        </TableContext>
-      </SharedHistoryContext>
-    </LexicalComposer>
-  );
-}
-
-export default function PlaygroundApp(): JSX.Element {
-  return (
-    <SettingsContext>
-      <App />
-    </SettingsContext>
+    <div className="app">
+      <div className="app-column">
+        <header className="app-header">
+          Terminal editor
+          <small className="app-header-subtext">
+            syntax highlighting, code-completion typeahead
+          </small>
+        </header>
+        <div className="editor-shell">
+          <CodeEditor
+            initialValue={code}
+            onChange={onTerminalChange}
+            onSubmit={onTerminalSubmit}
+            placeholder="Type an expression"
+          />
+        </div>
+      </div>
+      <div className="app-column">
+        <header className="app-header">
+          Comment editor
+          <small className="app-header-subtext">
+            markdown support, @mentions typeahead
+          </small>
+        </header>
+        <div className="editor-shell">
+          <CommentEditor
+            initialValue={comment}
+            onChange={onCommentChange}
+            onSubmit={onCommentSubmit}
+            placeholder="Write a comment"
+          />
+        </div>
+      </div>
+    </div>
   );
 }

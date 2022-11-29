@@ -50,6 +50,7 @@ const SYMBOLS: Record<string, string> = Object.freeze({
 });
 
 export function TreeView({
+  children = null,
   timeTravelButtonClassName,
   timeTravelPanelSliderClassName,
   timeTravelPanelButtonClassName,
@@ -57,6 +58,7 @@ export function TreeView({
   timeTravelPanelClassName,
   editor,
 }: {
+  children?: React.ReactNode;
   editor: LexicalEditor;
   timeTravelButtonClassName: string;
   timeTravelPanelButtonClassName: string;
@@ -239,6 +241,7 @@ export function TreeView({
           </button>
         </div>
       )}
+      {children}
     </div>
   );
 }

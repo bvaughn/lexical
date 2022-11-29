@@ -9,7 +9,7 @@ const VERTICAL_GAP = 10;
 const HORIZONTAL_OFFSET = 5;
 
 export function setFloatingElemPosition(
-  targetRect: ClientRect | null,
+  targetRect: {height: number; left: number; top: number} | null,
   floatingElem: HTMLElement,
   anchorElem: HTMLElement,
   verticalGap: number = VERTICAL_GAP,

@@ -73,7 +73,7 @@ module.exports = {
         '@typescript-eslint/ban-ts-comment': OFF,
         '@typescript-eslint/no-this-alias': OFF,
         '@typescript-eslint/no-unused-vars': [ERROR, {args: 'none'}],
-        'header/header': [2, 'scripts/www/headerTemplate.js'],
+        'header/header': OFF,
       },
     },
     {
@@ -139,7 +139,7 @@ module.exports = {
 
     'flowtype/sort-keys': ERROR,
 
-    'header/header': [2, 'scripts/www/headerTemplate.js'],
+    'header/header': OFF,
 
     // (This helps configure simple-import-sort) Make sure all imports are at the top of the file
     'import/first': ERROR,

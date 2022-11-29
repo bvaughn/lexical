@@ -1,6 +1,10 @@
 import {$isRangeSelection, $isTextNode, TextNode} from 'lexical';
 
 import {QueryData, TypeAheadSelection} from '../typeahead/types';
+import {
+  traverseTextNodesBackward,
+  traverseTextNodesForward,
+} from '../typeahead/utils/text';
 
 export default function getCodeCompletionQueryData(
   selection: TypeAheadSelection | null,
@@ -19,109 +23,73 @@ export default function getCodeCompletionQueryData(
 
   let beginOffset = -1;
   let beginTextNode: TextNode | null = node;
+  let dotCount = 0;
+  console.log(`getQueryData`, node, offset);
 
-  {
-    let currentOffset = offset - 1;
-    let currentTextNode: TextNode | null = node;
-    let currentText = node.getTextContent();
-
-    if (currentTextNode !== null) {
-      back: while (true) {
-        for (currentOffset; currentOffset >= 0; currentOffset--) {
-          const char = currentText.charAt(currentOffset);
-          if (isBoundaryChar(char)) {
-            // We've found the beginning of this expression.
-            break back;
-          }
-
-          beginOffset = currentOffset;
-          beginTextNode = currentTextNode;
-        }
-
-        const previousTextNode: TextNode | null =
-          currentTextNode.getPreviousSibling();
-        if (
-          previousTextNode === null ||
-          typeof previousTextNode.isSimpleText !== 'function' ||
-          !previousTextNode.isSimpleText()
-        ) {
-          break back;
-        }
-
-        currentTextNode = previousTextNode;
-        currentText = previousTextNode.getTextContent();
-        currentOffset = currentText.length - 1;
+  traverseTextNodesBackward(
+    node,
+    offset - 1,
+    (char: string, currentTextNode: TextNode, currentOffset: number) => {
+      console.log(
+        `backward "${char}" -> ${isBoundaryChar(char)}`,
+        currentTextNode,
+        currentOffset,
+      );
+      if (isBoundaryChar(char)) {
+        return true;
       }
-    }
+
+      if (char === '.') {
+        dotCount++;
+      }
+
+      beginOffset = currentOffset;
+      beginTextNode = currentTextNode;
+
+      return false;
+    },
+  );
+
+  if (beginTextNode === null) {
+    return null;
   }
 
-  let expression = '';
-
+  let isPastCursor = false;
   let endOffset = -1;
   let endTextNode: TextNode | null = null;
+  console.log(`dots? ${dotCount}`);
 
-  {
-    let currentOffset = beginOffset;
-    let currentTextNode: TextNode | null = beginTextNode;
-    let currentText = beginTextNode?.getTextContent() ?? '';
+  const text = traverseTextNodesForward(
+    beginTextNode,
+    beginOffset,
+    (char: string, currentTextNode: TextNode, currentOffset: number) => {
+      console.log(
+        `forward "${char}" (${isPastCursor}) -> ${isBoundaryChar(char)}`,
+        currentTextNode,
+        currentOffset,
+      );
 
-    let isPastCursor = false;
-
-    if (currentTextNode !== null) {
-      forward: while (true) {
-        for (
-          currentOffset;
-          currentOffset < currentText.length;
-          currentOffset++
-        ) {
-          // Once we've got back to the cursor, we should break at the next "."
-          if (currentOffset === offset && currentTextNode === node) {
-            isPastCursor = true;
-          }
-
-          const char = currentText.charAt(currentOffset);
-          if (isBoundaryChar(char)) {
-            endOffset = currentOffset;
-            endTextNode = currentTextNode;
-
-            break forward;
-          } else if (isPastCursor && char === '.') {
-            endOffset = currentOffset;
-            endTextNode = currentTextNode;
-
-            break forward;
-          }
-
-          expression += char;
-        }
-
-        const nextTextNode: TextNode | null = currentTextNode.getNextSibling();
-        if (nextTextNode === null) {
-          // We've reached the end of the text.
-          break forward;
-        } else if (!nextTextNode.isSimpleText()) {
-          // Don't try to parse complex nodes.
-          break forward;
-        } else {
-          const nextTextContent = nextTextNode.getTextContent() || '';
-          if (isBoundaryChar(nextTextContent.charAt(0))) {
-            // If the next node is a boundary, end on the current node.
-            break forward;
-          }
-        }
-
-        currentTextNode = nextTextNode;
-        currentText = nextTextNode.getTextContent();
-        currentOffset = 0;
+      if (isBoundaryChar(char) || (isPastCursor && char === '.')) {
+        return true;
       }
-    }
 
-    if (endTextNode === null) {
+      // Once we've got back to the cursor, we should break at the next "."
+      if (char === '.') {
+        dotCount--;
+
+        if (dotCount <= 0) {
+          isPastCursor = true;
+        }
+      }
+
       endOffset = currentOffset;
       endTextNode = currentTextNode;
-    }
-  }
 
+      return false;
+    },
+  );
+
+  const expression = isPastCursor ? text : '';
   const pieces = expression.split('.');
   const query = '.' + (pieces[pieces.length - 1] || '');
   const queryAdditionalData = pieces.slice(0, -1).join('.') || '';
